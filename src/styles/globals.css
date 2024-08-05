@@ -1,33 +1,37 @@
-@tailwind base;
+
+@layer tailwind-base, antd;
+
+@layer tailwind-base {
+  @tailwind base;
+}
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+body{
+    @apply bg-gray-900;
+    @apply text-gray-100
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.active{
+  @apply hover:bg-blue-400 p-2
+  bg-blue-500 rounded-md font-bold text-white inline-block transition;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.normal{
+  @apply font-bold text-white hover:scale-110 inline-block transition
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+
+thead>tr>th.ant-table-cell {
+    background: #20293c !important;
+    font-size: large;
+    color: white;
+    border: none;
 }
+
+.ant-table-tbody > tr.ant-table-row:hover > td {
+    background: none !important;
+    cursor: pointer;
+}
+
+
