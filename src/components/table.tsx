@@ -3,23 +3,16 @@
 import { Table, type TableProps } from 'antd'
 import Link from 'next/link'
 import { Product } from '@prisma/client'
-import { useRouter } from 'next/router'
+import { useState } from 'react'
+import { deleteProduct } from '@/services/services'
 
 
 function TableProducts(props: TableProps<Product>) {
+    const [products, setProducts] = useState(props.dataSource)
 
-    const router = useRouter()
-
-    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const id = formData.get('id')
-        const res = await fetch(`http://localhost:3000/api/product/${id}`, {
-            method: 'DELETE',
-        })
-        if (res.ok) {
-            router.push('/')
-        }
+    const handleDelete = (product: Product) => async () => {
+        await deleteProduct(product)
+        setProducts(prevProducts => prevProducts?.filter(p => p.id !== product.id))
     }
 
     const columns: TableProps<Product>['columns'] = [
@@ -48,12 +41,10 @@ function TableProducts(props: TableProps<Product>) {
                         className='bg-blue-400 text-white p-2 rounded-md font-semibold'
                         href={`/edit-product/${record.id}/`}>Editar</Link >
 
-                    <form onSubmit={onSubmit}>
-                        <input type="hidden" name="id" value={record.id} />
-                        <button type='submit'
-                            className='bg-red-400 text-white p-2 rounded-md font-semibold'
-                        >Eliminar</button>
-                    </form>
+                    <button onClick={handleDelete(record)}
+                        className='bg-red-400 text-white p-2 rounded-md font-semibold'
+                    >Eliminar</button>
+
 
 
                 </div>
@@ -62,8 +53,10 @@ function TableProducts(props: TableProps<Product>) {
     ]
 
     return (
-        <Table {...props} rowClassName="bg-slate-900 hover:bg-slate-900" columns={columns} rowKey={record => record.id} />
+        <Table {...props} dataSource={products} rowClassName="bg-slate-900 hover:bg-slate-900" columns={columns} rowKey={record => record.id} />
     )
 }
 
 export default TableProducts
+
+

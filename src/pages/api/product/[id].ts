@@ -17,8 +17,7 @@ export default async function handle(
             })
             if (!product)
                 return res.status(404).json({ error: 'Product not found' })
-            if (product)
-                return res.status(200).json(product)
+            return res.status(200).json(product)
         }
 
         if (req.method === 'PUT') {
@@ -35,7 +34,7 @@ export default async function handle(
             const product = await prisma.product.delete({
                 where: { id: Number(id) }
             })
-            return res.status(204).json(product)
+            return res.json(product)
         }
     } catch (error) {
         console.log(error)

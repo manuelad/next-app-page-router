@@ -46,3 +46,14 @@ export async function editProduct(product: ProductDto) {
     const data = await res.json()
     return data
 }
+
+export async function deleteProduct(product: ProductDto) {
+    const res = await fetch(`http://localhost:3000/api/product/${product.id}`, {
+        method: 'DELETE',
+    })
+    if (!res.ok)
+        throw new Error('Error eliminando el producto')
+    const productDelete = await res.json()
+    return productDelete
+
+}

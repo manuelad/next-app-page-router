@@ -1,7 +1,7 @@
 export interface ProductDto {
-    id: number
+    id?: number
     name: string
-    description: number
+    description: string
     updatedAt?: Date
     cretedAt?: Date
 }

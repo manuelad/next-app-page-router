@@ -1,86 +1,106 @@
-
+import React from 'react'
+import { Button, message, Form, Input, FormProps, } from 'antd'
+import { createProduct, editProduct } from '@/services/services'
 import { ProductDto } from '@/pages/types'
-import { createProduct } from '@/services/services'
-import React, { useRef } from 'react'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { z } from 'zod'
+import { useRouter } from 'next/router'
 
 
-const shema = z.object({
-    name: z.string().trim().min(1, {
-        message: 'name is required'
-    }),
-    description: z.string().trim().min(1, {
-        message: 'description is required'
-    })
-})
+type FieldType = ProductDto
+
+type props = {
+    product?: ProductDto
+}
+
+export const ProductForm: React.FC<FormProps<FieldType>> = (props: FormProps<FieldType>) => {
 
 
-function ProductForm() {
+    const [form] = Form.useForm()
+    const router = useRouter()
 
-    const ref = useRef<HTMLFormElement>(null)
 
-    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const data = Object.fromEntries(formData)
-
-        const validate = shema.safeParse(data)
-        if (!validate.success) {
-            return toast.error(validate.error.errors.flatMap((error) => error.message).join(', '))
-        }
+    const addProduct = async () => {
         try {
-            if (validate.success) {
-                await createProduct(data as unknown as ProductDto)
-                toast.success('product created')
-            }
+            const product = form.getFieldsValue()
+            await createProduct(product)
+            form.resetFields()
+            message.success('Producto creado exitosamente')
         } catch (error) {
-            if (error instanceof Error)
-                toast.error(error.message)
-            toast.error('something went wrong')
+            message.error('Ha ocurrido un error al crear el producto')
         }
-        ref.current?.reset()
 
     }
+
+    const buttonTitle = props.initialValues ? 'Editar' : 'Crear'
+
+
+    const setProduct = async (id: number) => {
+        try {
+            let product = form.getFieldsValue({ strict: true })
+            product = { ...product, id }
+            await editProduct(product)
+            router.push('/')
+        } catch (error) {
+            message.error('Ha ocurrido un error al editar el producto')
+        }
+    }
+
+    const handleClick = async () => {
+        if (props.initialValues && props.initialValues.id)
+            await setProduct(props.initialValues.id)
+        else
+            await addProduct()
+
+    }
+
+    const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+        message.success(errorInfo.errorFields.join(', '))
+    }
+
     return (
-        <>
-            <form
-                ref={ref}
-                onSubmit={onSubmit}
-                className='max-w-md mx-auto border-neutral-200 rounded-md border-2 p-8'>
 
-                <h1 className='text-3xl text-center mb-3'>Crear Producto</h1>
-                <input
-                    type="text"
-                    name='name'
-                    autoFocus
-                    placeholder='nombre del producto'
-                    defaultValue={undefined}
-                    className='w-full px-4 py-2 text-black bg-white rounded-md focus:outline-none
-            focus:ring-2 focus:ring-blue-600 mb-5'
-                />
-                <textarea
-                    name="description"
-                    id="description"
-                    defaultValue={undefined}
-                    className='w-full px-4 py-2 text-black bg-white rounded-md focus:outline-none
-            focus:ring-2 focus:ring-blue-600 mb-5'
-                    placeholder='descripcion del producto' />
+        <Form
+            {...props}
+            form={form}
+            className='w-[75%]'
+            labelCol={{ span: 8 }}
+            wrapperCol={{ span: 16 }}
+            style={{ maxWidth: 600, color: 'white' }}
+            autoComplete="off"
+            onFinishFailed={onFinishFailed}
+        >
+            <Form.Item<FieldType>
+                label="nombre"
+                name="name"
+                rules={[
+                    {
+                        required: true,
+                        message: 'El nombre del producto es requerido'
+                    }
 
-                <button type='submit'
-                    className='px-5 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700'
-                >
-                    Crear Producto
-                </button>
-            </form>
+                ]}
+            >
+                <Input />
+            </Form.Item>
 
-            <ToastContainer
-                position="bottom-right"
-                autoClose={4000}
-                limit={2}
-            />
-        </>
+            <Form.Item<FieldType>
+                label="descripción"
+                name="description"
+                rules={[
+                    {
+                        required: true,
+                        message: 'El nombre del producto es requerido'
+                    }
+                ]}
+            >
+                <Input.TextArea />
+            </Form.Item>
+
+            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                <Button type="primary" onClick={handleClick}>
+                    {buttonTitle}
+                </Button>
+            </Form.Item>
+        </Form>
 
     )
 }
