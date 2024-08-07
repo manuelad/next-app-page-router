@@ -44,7 +44,7 @@ export const ProductForm: React.FC<FormProps<FieldType>> = (props: FormProps<Fie
         }
     }
 
-    const handleClick = async () => {
+    const onFinishSuccess: FormProps<FieldType>['onFinish'] = async () => {
         if (props.initialValues && props.initialValues.id)
             await setProduct(props.initialValues.id)
         else
@@ -53,7 +53,7 @@ export const ProductForm: React.FC<FormProps<FieldType>> = (props: FormProps<Fie
     }
 
     const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
-        message.success(errorInfo.errorFields.join(', '))
+        message.error(errorInfo.errorFields.map((field) => field.errors[0]).join('\n'))
     }
 
     return (
@@ -67,17 +67,14 @@ export const ProductForm: React.FC<FormProps<FieldType>> = (props: FormProps<Fie
             style={{ maxWidth: 600, color: 'white' }}
             autoComplete="off"
             onFinishFailed={onFinishFailed}
+            onFinish={onFinishSuccess}
+            requiredMark={false}
         >
             <Form.Item<FieldType>
                 label="nombre"
                 name="name"
-                rules={[
-                    {
-                        required: true,
-                        message: 'El nombre del producto es requerido'
-                    }
+                rules={[{ required: true, message: 'El nombre del producto es requerido' }]}
 
-                ]}
             >
                 <Input />
             </Form.Item>
@@ -85,18 +82,13 @@ export const ProductForm: React.FC<FormProps<FieldType>> = (props: FormProps<Fie
             <Form.Item<FieldType>
                 label="descripción"
                 name="description"
-                rules={[
-                    {
-                        required: true,
-                        message: 'El nombre del producto es requerido'
-                    }
-                ]}
+                rules={[{ required: true, message: 'La descripcion del producto es requerido' }]}
             >
                 <Input.TextArea />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                <Button type="primary" onClick={handleClick}>
+                <Button type="primary" htmlType='submit'>
                     {buttonTitle}
                 </Button>
             </Form.Item>
